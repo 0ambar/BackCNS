@@ -2,6 +2,7 @@ import express from 'express';
 import userRoutes from "./routes/userRoutes.js";
 import staffRoutes from "./routes/staffRoutes.js";
 import adminRoutes from "./routes/adminRoutes.js";
+import cartillaRoutes from "./routes/cartillaRoutes.js";
 import db from "./config/db.js";
 import bodyparser from 'body-parser';
 import cors from 'cors';
@@ -40,6 +41,7 @@ app.use(express.static('public'));
 app.use('/usuario', userRoutes);
 app.use('/personal', staffRoutes);
 app.use('/admin', adminRoutes);
+app.use('/usuario/cartilla', cartillaRoutes);
 
 
 // Definir el puerto y arrancarlo

@@ -1,6 +1,8 @@
 import entidades from "./entidades.js";
+import usuarios from "./usuarios.js";
+import cartillas from "./cartillas.js";
 import db from "../config/db.js";
-import { EntidadFederativa } from "../models/index.js"
+import { EntidadFederativa, User, Cartilla } from "../models/index.js"
 
 // Funcion para importar datos del seeder e insertarlos en las tablas 'precios' y 'categorias'
 const importarDatos = async () => {
@@ -14,8 +16,11 @@ const importarDatos = async () => {
         // Insertamos en la base de datos con promise porque son procesos independientes
         await Promise.all([
             EntidadFederativa.bulkCreate(entidades), // Insertar estados de la republica
+            Cartilla.bulkCreate(cartillas),
         ]);
-
+        
+        await User.bulkCreate(usuarios)
+        
         console.log('Datos importados correctamente');
         exit(0);
 
