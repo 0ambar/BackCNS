@@ -1,4 +1,5 @@
 import { User }from '../models/index.js'
+import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
 const nuevoPaciente = async (req, res, next) => {
@@ -111,18 +112,34 @@ const eliminarPaciente = async (req, res, next) => {
     }
 }
 
-const iniciarSesion = async (req, res, next) => {    
+const iniciarSesion = async (req, res, next) => { 
+    // buscar el paciente   
     const { email, password } = req.body;
     const paciente = await User.findOne({ where : { email }});
     if(!paciente) {
         res.status(401).json({mensaje : 'Ese paciente no existe'});
         return next();
-    }
-    if(bcrypt.compareSync(password, paciente.password)) {
-        res.json(paciente);
     } else {
-        res.status(401).json({mensaje : 'Contraseña incorrecta'});
-        next();
+        // El usuario existe, verificar si el password es correcto o incorrecto
+        if(!bcrypt.compareSync(password, paciente.password )) {
+            // si el password es incorrecto
+            await res.status(401).json({ mensaje : 'Password Incorrecto'});
+            next();
+        } else {
+            // password correcto, firmar el token
+            const token = jwt.sign({
+                email : paciente.email, 
+                nombre: paciente.nombre, 
+                id : paciente.id
+            }, 
+            'LLAVESECRETA', 
+            {
+                expiresIn : '24h'
+            }); 
+            
+            // retornar el TOKEN
+            res.json({ token });
+        }
     }
 }
 
