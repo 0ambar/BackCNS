@@ -20,10 +20,6 @@ try {
 }
 
 
-// Habilitar lectura de datos de formularios
-app.use(express.urlencoded({extended: true}));
-
-
 // Habilitar bodyparser
 app.use(bodyparser.json());
 app.use(bodyparser.urlencoded({extended: true}));

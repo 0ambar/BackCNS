@@ -4,7 +4,8 @@ import {
     mostrarPacientes,
     mostrarPaciente,
     actualizarPaciente,
-    eliminarPaciente
+    eliminarPaciente,
+    iniciarSesion
 } from "../controllers/userController.js";
 
 const router = express.Router();
@@ -23,5 +24,8 @@ router.put('/:idPaciente', actualizarPaciente);
 
 // Elimnar paciente por su ID
 router.delete('/:idPaciente', eliminarPaciente);
+
+// Iniciar sesion
+router.post('/login', iniciarSesion);
 
 export default router

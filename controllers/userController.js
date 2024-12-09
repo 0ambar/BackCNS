@@ -111,11 +111,29 @@ const eliminarPaciente = async (req, res, next) => {
     }
 }
 
+const iniciarSesion = async (req, res, next) => {    
+    const { email, password } = req.body;
+    const paciente = await User.findOne({ where : { email }});
+    if(!paciente) {
+        res.status(401).json({mensaje : 'Ese paciente no existe'});
+        return next();
+    }
+    if(bcrypt.compareSync(password, paciente.password)) {
+        res.json(paciente);
+    } else {
+        res.status(401).json({mensaje : 'Contraseña incorrecta'});
+        next();
+    }
+}
+
+
+
 // export nombrado
 export {
     nuevoPaciente,
     mostrarPacientes,
     mostrarPaciente,
     actualizarPaciente,
-    eliminarPaciente
+    eliminarPaciente,
+    iniciarSesion
 }
