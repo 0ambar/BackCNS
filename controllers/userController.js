@@ -81,7 +81,8 @@ const actualizarPaciente = async (req, res, next) => {
 
 const autenticarUsuario = async (req, res, next) => { 
     // buscar el paciente   
-    const { email, password } = req.body;
+    let { email, password } = req.body;
+    email = email ? email : '';
     const paciente = await User.findOne({ where : { email }});
     
     if(!paciente) {
