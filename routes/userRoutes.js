@@ -1,31 +1,21 @@
 import express from "express";
-import { 
-    nuevoPaciente,
-    mostrarPacientes,
+import {
     mostrarPaciente,
     actualizarPaciente,
-    eliminarPaciente,
-    iniciarSesion
+    autenticarUsuario
 } from "../controllers/userController.js";
+
+import auth from "../middleware/auth.js";
 
 const router = express.Router();
 
-// Agrega nuevos pacientes via POST
-router.post('/', nuevoPaciente);
-
-// Obtener todos los pacientes
-router.get('/', mostrarPacientes);
-
-// Muestra un paciente en especifico (ID)
+// Muestra un paciente en especifico 
 router.get('/:idPaciente', mostrarPaciente);
 
-// Actualizar paciente
-router.put('/:idPaciente', actualizarPaciente);
-
-// Elimnar paciente por su ID
-router.delete('/:idPaciente', eliminarPaciente);
+// Actualizar correo o constraseña
+router.put('/:idPaciente', auth, actualizarPaciente);
 
 // Iniciar sesion
-router.post('/login', iniciarSesion);
+router.post('/login', autenticarUsuario);
 
 export default router

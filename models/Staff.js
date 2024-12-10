@@ -36,7 +36,7 @@ const Staff = db.define('staff', {
     },
     
     // Estatus del trabajador, si esta activo o no
-    estatus: DataTypes.BOOLEAN, 
+    estatus: DataTypes.STRING, 
 }, 
     
     // Funcion para encriptar la contraseña del usuario

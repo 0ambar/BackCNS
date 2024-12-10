@@ -51,7 +51,7 @@ const Admin = db.define('admin', {
 
 // Metodos personalizados
 // Veriricar que el password del ususario este correcto
-Staff.prototype.verificarPassword = function(password) {
+Admin.prototype.verificarPassword = function(password) {
     return bcrypt.compareSync(password, this.password);
 }
 

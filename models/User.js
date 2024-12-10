@@ -20,7 +20,8 @@ const Usuario = db.define('usuario', {
     },
 
     email: {
-        type: DataTypes.STRING
+        type: DataTypes.STRING,
+        unique: true
     },
 
     password: {

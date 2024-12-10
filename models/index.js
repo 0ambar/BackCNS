@@ -2,6 +2,7 @@ import User from './User.js';
 import Staff from './Staff.js';
 import Cartilla from './Cartilla.js';
 import EntidadFederativa from './EntidadFederativa.js';
+import Admin from './Admin.js';
 
 // Relacion para la cartilla de un usuario
 User.belongsTo(Cartilla, {foreignKey: 'cartillaId'});
@@ -13,5 +14,6 @@ export {
     User,
     Staff,
     Cartilla,
-    EntidadFederativa
+    EntidadFederativa,
+    Admin
 }

@@ -1,26 +1,9 @@
 import { User }from '../models/index.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
+import dotenv from 'dotenv'
 
-const nuevoPaciente = async (req, res, next) => {
-    try {
-        await User.create(req.body);
-        res.json({mensaje : 'Se agrego un nuevo paciente'});
-    } catch (error) {
-        res.send(error);
-        next();
-    }
-}
-
-const mostrarPacientes = async (req, res, next) => {
-    try {
-        const pacientes = await User.findAll();
-        res.json(pacientes);
-    } catch (error) {
-        console.log(error);
-        next();
-    }
-}
+dotenv.config({path: '.env'});
 
 const mostrarPaciente = async (req, res, next) => {
     const paciente = await User.findByPk(req.params.idPaciente);
@@ -43,81 +26,66 @@ const mostrarPaciente = async (req, res, next) => {
 
         const edad = calcularEdad(paciente.fechaNacimiento);
 
-        // Mostrar el paciente con la edad calculada
-        res.json({ ...paciente.toJSON(), edad });
+        // Mostrar el paciente con la edad calculada y sin contraseña
+        const pacienteData = { ...paciente.toJSON(), edad };
+        delete pacienteData.password
+        delete pacienteData.createdAt; // Eliminar el campo que no quieres mostrar
+        delete pacienteData.updatedAt; // Eliminar el campo que no quieres mostrar
+        res.json(pacienteData);
     }
 }
 
 const actualizarPaciente = async (req, res, next) => {
 
-    const {
-        nombre,
-        apellidoPaterno,
-        apellidoMaterno,
-        email,
-        password,
-        curp,
-        tipoSangre,
-        domicilio,
-        fehcaNacimiento,
-        genero,
-        lugarNacimiento,
-        estatus,
-        cartillaId,
-        entidadId
-    } = req.body;
+    const { password, newEmail, newPassword } = req.body;
+    const paciente = await User.findByPk(req.params.idPaciente);
+    console.log(req.body);   
+    
+    // El usuario existe, verificar si el password es correcto o incorrecto
+    if(!paciente.verificarPassword(password ? password : '') || (!password)) {
+        // si el password es incorrecto
+        await res.status(401).json({ mensaje : 'Password Incorrecto'});
+        return next();
+    }            
 
+    
     const salt = await bcrypt.genSalt(10);
-    const passwordHashed = await bcrypt.hash(password, salt);
+    const passwordHashed = await bcrypt.hash(( newPassword ? newPassword : password), salt);
+    console.log(newPassword)
 
     
     try {
-        await User.update({
-            nombre,
-            apellidoPaterno,
-            apellidoMaterno,
-            email,
-            password : passwordHashed,
-            curp: curp.toUpperCase(),
-            tipoSangre,
-            domicilio,
-            fehcaNacimiento,
-            genero,
-            lugarNacimiento,
-            estatus,
-            cartillaId,
-            entidadId
-        }, {
-            where : { id : req.params.idPaciente }
-        });
-        res.json({mensaje : `El paciente se ha actualizado`});
+        paciente.password = passwordHashed;
+        paciente.email = newEmail ? newEmail : paciente.email;
+        await paciente.save();
+        
+        // firmar el token
+        const token = jwt.sign({
+            email : paciente.email, 
+            id : paciente.id,
+            curp: paciente.curp
+        }, 
+        process.env.SECRET, 
+        {
+            expiresIn : '24h'
+        }); 
+        
+        // retornar el TOKEN
+        res.json({token: token , mensaje: `Sus datos se han actualizado`});
+
     } catch (error) {
         res.send(error);
         next();
     }
 }
 
-
-const eliminarPaciente = async (req, res, next) => {
-    try {
-        const eliminado = await User.destroy({ where : { id : req.params.idPaciente }});
-        if(!eliminado) {
-            res.json({mensaje : 'Ese paciente no existe'});
-            next();
-        }
-        res.json({mensaje : 'El paciente se ha eliminado'});
-    } catch (error) {
-        console.log(error);
-        next();
-    }
-}
-
-const iniciarSesion = async (req, res, next) => { 
+const autenticarUsuario = async (req, res, next) => { 
     // buscar el paciente   
     const { email, password } = req.body;
     const paciente = await User.findOne({ where : { email }});
+    
     if(!paciente) {
-        res.status(401).json({mensaje : 'Ese paciente no existe'});
+        res.status(401).json({mensaje : 'No eres un paciente registrado'});
         return next();
     } else {
         // El usuario existe, verificar si el password es correcto o incorrecto
@@ -129,10 +97,10 @@ const iniciarSesion = async (req, res, next) => {
             // password correcto, firmar el token
             const token = jwt.sign({
                 email : paciente.email, 
-                nombre: paciente.nombre, 
-                id : paciente.id
+                id : paciente.id,
+                curp: paciente.curp
             }, 
-            'LLAVESECRETA', 
+            process.env.SECRET, 
             {
                 expiresIn : '24h'
             }); 
@@ -147,10 +115,7 @@ const iniciarSesion = async (req, res, next) => {
 
 // export nombrado
 export {
-    nuevoPaciente,
-    mostrarPacientes,
     mostrarPaciente,
     actualizarPaciente,
-    eliminarPaciente,
-    iniciarSesion
+    autenticarUsuario
 }
