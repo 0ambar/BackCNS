@@ -34,10 +34,11 @@ app.use(express.static('public'));
 
 
 // Routing
+app.use('/usuario/cartilla', cartillaRoutes);
 app.use('/usuario', userRoutes);
+app.use('/personal/cartilla', cartillaRoutes);
 app.use('/personal', staffRoutes);
 app.use('/admin', adminRoutes);
-app.use('/usuario/cartilla', cartillaRoutes);
 
 
 // Definir el puerto y arrancarlo

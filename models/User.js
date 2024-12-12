@@ -44,7 +44,7 @@ const Usuario = db.define('usuario', {
     },
 
     fechaNacimiento: {
-        type: DataTypes.DATE,
+        type: DataTypes.DATEONLY,
         allowNull: false
     },
 

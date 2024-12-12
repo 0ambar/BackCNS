@@ -2,6 +2,7 @@ import express from "express";
 
 import {
     mostrarCartilla,
+    mostrarCartillas,
     nuevaCartilla,
     actualizarCartilla,
     eliminarCartilla
@@ -13,7 +14,7 @@ const router = express.Router();
 router.post('/', nuevaCartilla);
 
 // Obtener todas las cartillas
-router.get('/', mostrarCartilla);
+// router.get('/', mostrarCartillas);
 
 // Muestra una cartilla en especifico (ID)
 router.get('/:idCartilla', mostrarCartilla);

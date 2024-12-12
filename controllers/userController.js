@@ -1,4 +1,4 @@
-import { User }from '../models/index.js'
+import { User, Cartilla, EntidadFederativa }from '../models/index.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import dotenv from 'dotenv'
@@ -6,7 +6,12 @@ import dotenv from 'dotenv'
 dotenv.config({path: '.env'});
 
 const mostrarPaciente = async (req, res, next) => {
-    const paciente = await User.findByPk(req.params.idPaciente);
+    const paciente = await User.findByPk(req.params.idPaciente,{
+        include: [
+            { model: Cartilla },
+            { model: EntidadFederativa }
+        ]
+    });
 
     if (!paciente) {
         res.json({ mensaje: 'Ese paciente no existe' });
