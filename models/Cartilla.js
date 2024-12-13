@@ -36,6 +36,34 @@ const Cartilla = db.define('cartilla', {
         allowNull: true
     },
 
+    antecedentes: {
+        type: DataTypes.JSON
+    },
+
+    atencionMedica: {
+        type: DataTypes.JSON
+    },
+
+    nutricion: {
+        type: DataTypes.JSON
+    },
+
+    actividadFisica: {
+        type: DataTypes.JSON
+    },
+
+    saludSexual: {
+        type: DataTypes.JSON
+    },
+
+    medicamentos: {
+        type: DataTypes.JSON,
+    },
+
+    citas: {
+        type: DataTypes.JSON
+    },
+
     observaciones: {
         type: DataTypes.TEXT,
         allowNull: true
