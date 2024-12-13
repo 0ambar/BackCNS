@@ -10,10 +10,10 @@ import auth from "../middleware/auth.js";
 const router = express.Router();
 
 // Muestra un paciente en especifico 
-router.get('/:idPaciente',  mostrarPaciente);
+router.get('/:idPaciente', mostrarPaciente);
 
 // Actualizar correo o constraseña
-router.put('/:idPaciente', auth, actualizarPaciente);
+router.put('/:idPaciente', actualizarPaciente);
 
 // Iniciar sesion
 router.post('/login', autenticarUsuario);

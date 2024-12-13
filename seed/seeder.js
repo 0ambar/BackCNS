@@ -5,6 +5,53 @@ import trabajadores from "./trabajadores.js";
 import db from "../config/db.js";
 import { EntidadFederativa, User, Cartilla, Staff } from "../models/index.js"
 
+
+// scripts/populateDatabase.js
+import fs from 'fs';
+import path from 'path';
+import Asentamiento from '../models/Asentamiento.js';
+
+const dirname = path.dirname(new URL(import.meta.url).pathname).substring(1);
+const filePath = path.join(dirname, 'CPdescarga.txt');
+
+const populateDatabase = async () => {
+    console.log(dirname)
+    console.log(filePath)
+  try {
+    // Autenticar
+    await db.authenticate();
+
+    await db.sync(); // Drop and recreate tables
+
+    const data = fs.readFileSync(filePath, 'utf8');
+    const lines = data.split('\n');
+    let cont = 0;
+
+    for (const line of lines) {
+      const [
+        d_codigo, d_asenta, D_mnpio, d_estado, d_ciudad, c_mnpio,
+        id_asenta_cpcons
+      ] = line.split('|');
+
+      if(cont === 0){
+        console.log(line)
+        }
+        cont++;
+
+      await Asentamiento.create({
+        d_codigo, d_asenta, D_mnpio, d_estado, d_ciudad, c_mnpio,
+        id_asenta_cpcons
+      });
+    }
+    
+    console.log('Database populated successfully');
+    process.exit(0);
+  } catch (error) {
+    console.error('Error populating database:', error);
+    process.exit(1);
+  }
+};
+
 // Funcion para importar datos del seeder e insertarlos en las tablas 'precios' y 'categorias'
 const importarDatos = async () => {
     try {
@@ -24,7 +71,7 @@ const importarDatos = async () => {
         await User.bulkCreate(usuarios);
         
         console.log('Datos importados correctamente');
-        exit(0);
+        process.exit(0);
 
     } catch (error) {
         console.log(error);
@@ -44,7 +91,7 @@ const eliminarDatos = async () => {
         await db.sync({force: true});
     
         console.log('Datos eliminados correctamente');
-        exit(0);
+        process.exit(0);
     
     } catch (error) {
         console.log(error);
@@ -63,4 +110,9 @@ if(process.argv[2] === '-i') {
 // Funcion que manda a llamar 'eliminarDatos' cuando se ejecute el comando 'db:eliminar' en la termial
 if(process.argv[2] === '-e') {
     eliminarDatos();
+}
+
+
+if(process.argv[2] === '-p') {
+    populateDatabase();
 }
