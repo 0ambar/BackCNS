@@ -2,8 +2,11 @@ import entidades from "./entidades.js";
 import usuarios from "./usuarios.js";
 import cartillas from "./cartillas.js";
 import trabajadores from "./trabajadores.js";
+
+import antecedentes from "./Controles/antecedentes.js";
+
 import db from "../config/db.js";
-import { EntidadFederativa, User, Cartilla, Staff } from "../models/index.js"
+import { EntidadFederativa, User, Cartilla, Staff, Antecedente } from "../models/index.js"
 
 
 // scripts/populateDatabase.js
@@ -65,7 +68,8 @@ const importarDatos = async () => {
         await Promise.all([
             EntidadFederativa.bulkCreate(entidades), // Insertar estados de la republica
             Cartilla.bulkCreate(cartillas),
-            await Staff.bulkCreate(trabajadores)
+            Staff.bulkCreate(trabajadores),
+            Antecedente.bulkCreate(antecedentes)
         ]);
         
         await User.bulkCreate(usuarios);
