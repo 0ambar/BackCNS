@@ -12,11 +12,11 @@ const usuarios = [
         curp: 'RECA000000HDFXXX01',
         tipoSangre: 'O+',
         domicilio: 'Calle 1 #123',
-        fechaNacimiento: '1990-01-01',
+        fechaNacimiento: '1971-01-01',
         genero: 'Hombre',
         lugarNacimiento: 'Zumpango',
         cartillaId: 1,
-        entidadId: 1
+        domicilioId: 1
     },
     {
         nombre: 'Benito',
@@ -27,11 +27,11 @@ const usuarios = [
         curp: 'JUGB000000HDFXXX02',
         tipoSangre: 'AB-',
         domicilio: 'Calle 2 #456',
-        fechaNacimiento: '1990-01-02',
+        fechaNacimiento: '2019-01-02',
         genero: 'Hombre',
         lugarNacimiento: 'Xochimilco',
         cartillaId: 2,
-        entidadId: 2
+        domicilioId: 2
     },
     
     {
@@ -43,11 +43,11 @@ const usuarios = [
         curp: 'GOPC000000MDFXXX03',
         tipoSangre: 'A+',
         domicilio: 'Calle 3 #789',
-        fechaNacimiento: '1990-01-03',
+        fechaNacimiento: '2013-01-03',
         genero: 'Mujer',
         lugarNacimiento: 'Benito Juarez',
         cartillaId: 3,
-        entidadId: 3
+        domicilioId: 3
     },
     {
         nombre: 'Daniel',
@@ -58,11 +58,11 @@ const usuarios = [
         curp: 'HELD000000HDFXXX04',
         tipoSangre: 'B+',
         domicilio: 'Calle 4 #101',
-        fechaNacimiento: '1990-01-04',
+        fechaNacimiento: '1960-01-04',
         genero: 'Hombre',
         lugarNacimiento: 'Texcoco',
         cartillaId: 4,
-        entidadId: 4
+        domicilioId: 4
     },
     
     {
@@ -74,11 +74,11 @@ const usuarios = [
         curp: 'MASD000000MDFXXX05',
         tipoSangre: 'O-',
         domicilio: 'Calle 5 #202',
-        fechaNacimiento: '1990-01-05',
+        fechaNacimiento: '1980-01-05',
         genero: 'Mujer',
         lugarNacimiento: 'Acolman',
         cartillaId: 5,
-        entidadId: 5
+        domicilioId: 5
     }
 ];
 
