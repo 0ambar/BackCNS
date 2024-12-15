@@ -13,7 +13,8 @@ const nuevaCartilla = async (req, res, next) => {
 
 const mostrarCartillas = async (req, res, next) => {
     try {
-        const cartillas = await Cartilla.findAll();
+        // const cartillas = await Cartilla.findAll();
+        const cartillas = await Cartilla.getCitas({where: {id: 1}});
         res.json(cartillas);
     } catch (error) {
         console.log(error);
@@ -45,21 +46,11 @@ const mostrarCartilla = async (req, res, next) => {
 const actualizarCartilla = async (req, res, next) => {
 
     const {
-        tipo,
-        peso,
-        talla,
-        vacunas,
-        enfermedades,
-        observaciones
+        observaciones,
     } = req.body;
 
     try {
         await Cartilla.update({
-            tipo,
-            peso,
-            talla,
-            vacunas,
-            enfermedades,
             observaciones
         }, {
             where: { id: req.params.idCartilla }
@@ -83,10 +74,42 @@ const eliminarCartilla = async (req, res, next) => {
     }
 }
 
+
+
+// CITAS
+const nuevaCita = async (req, res) => {
+    const { cartillaId, horario, servicio, clave } = req.body;
+
+    try {
+        // Encuentra la cartilla por ID
+        const cartilla = await Cartilla.findByPk(cartillaId);
+
+        if (!cartilla) {
+            return res.status(404).json({ mensaje: 'Cartilla no encontrada' });
+        }
+
+        // Crea una nueva cita
+        await Cita.create({
+            horario,
+            servicio, 
+            clave,
+            cartillaId: cartilla.id
+        });
+
+        res.json({ mensaje: 'Cita registrada exitosamente' });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ mensaje: 'Error al agregar la cita' });
+    }
+};
+
 export {
     nuevaCartilla,
     mostrarCartillas,
     mostrarCartilla,
     actualizarCartilla,
-    eliminarCartilla
+    eliminarCartilla,
+
+    // CITAS
+    nuevaCita
 }

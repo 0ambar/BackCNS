@@ -5,7 +5,10 @@ import {
     mostrarCartillas,
     nuevaCartilla,
     actualizarCartilla,
-    eliminarCartilla
+    eliminarCartilla,
+
+    // CITAS
+    nuevaCita
 } from "../controllers/cartillaController.js";
 
 const router = express.Router();
@@ -24,5 +27,9 @@ router.put('/:idCartilla', actualizarCartilla);
 
 // Elimnar cartilla por su ID
 // router.delete('/:idCartilla', eliminarCartilla);
+
+
+// CITAS
+router.post('/nueva-cita', nuevaCita);
 
 export default router
