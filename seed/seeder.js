@@ -3,16 +3,27 @@ import usuarios from "./usuarios.js";
 import cartillas from "./cartillas.js";
 import trabajadores from "./trabajadores.js";
 
+// Controles de salud
 import antecedentes from "./Controles/antecedentes.js";
+import citas from "./Controles/citas.js"
+import estudios from "./Controles/estudios.js"
+import nutriciones from "./Controles/nutriciones.js"
+import saludsexuales from "./Controles/saludsexuales.js"
+import vacunas from "./Controles/vacunas.js"
 
 import db from "../config/db.js";
-import { EntidadFederativa, User, Cartilla, Staff, Antecedente } from "../models/index.js"
+import { 
+  EntidadFederativa, User, Cartilla, Staff, 
+  Antecedente, Cita, Estudio, Nutricion, SaludSexual, Vacuna
+} from "../models/index.js"
 
 
 // scripts/populateDatabase.js
 import fs from 'fs';
 import path from 'path';
 import Asentamiento from '../models/Asentamiento.js';
+import { promises } from "dns";
+import Nutrcion from "../models/Controles/Nutricion.js";
 
 const dirname = path.dirname(new URL(import.meta.url).pathname).substring(1);
 const filePath = path.join(dirname, 'CPdescarga.txt');
@@ -63,15 +74,24 @@ const importarDatos = async () => {
         
         // Generar columnas
         await db.sync();
-
+        
+        await Antecedente.bulkCreate(antecedentes),
+        
         // Insertamos en la base de datos con promise porque son procesos independientes
         await Promise.all([
-            EntidadFederativa.bulkCreate(entidades), // Insertar estados de la republica
-            Cartilla.bulkCreate(cartillas),
-            Staff.bulkCreate(trabajadores),
-            Antecedente.bulkCreate(antecedentes)
+          EntidadFederativa.bulkCreate(entidades), // Insertar estados de la republica
+          Cartilla.bulkCreate(cartillas),
+          Staff.bulkCreate(trabajadores),
         ]);
         
+        await Promise.all([
+          Cita.bulkCreate(citas),
+          Estudio.bulkCreate(estudios),
+          Nutricion.bulkCreate(nutriciones),
+          SaludSexual.bulkCreate(saludsexuales),
+          Vacuna.bulkCreate(vacunas),
+        ]);
+
         await User.bulkCreate(usuarios);
         
         console.log('Datos importados correctamente');

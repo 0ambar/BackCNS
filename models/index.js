@@ -6,6 +6,12 @@ import Admin from './Admin.js';
 
 // IMPORTACION CONTROLES
 import Antecedente from './Controles/Antecente.js';
+import Cita from './Controles/Cita.js';
+import Estudio from './Controles/Estudio.js'
+import Nutricion from './Controles/Nutricion.js'
+import SaludSexual from './Controles/SaludSexual.js'
+import Vacuna from './Controles/Vacuna.js'
+
 
 // USUARIOS
 // Relacion para la cartilla de un usuario
@@ -16,7 +22,12 @@ User.belongsTo(EntidadFederativa, {foreignKey: 'entidadId'});
 
 
 // CARTILLAS
-Cartilla.belongsTo(Antecedente, {foreignKey: 'antecedenteId'});
+Cartilla.belongsTo(Antecedente);
+Cartilla.hasMany(Cita);
+Cartilla.hasMany(Estudio);
+Cartilla.hasMany(Nutricion);
+Cartilla.hasMany(SaludSexual);
+Cartilla.hasMany(Vacuna);
 
 
 export {
@@ -26,5 +37,10 @@ export {
     EntidadFederativa,
     Admin,
 
-    Antecedente
+    Antecedente,
+    Cita,
+    Estudio,
+    Nutricion,
+    SaludSexual,
+    Vacuna
 }

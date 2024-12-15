@@ -1,4 +1,5 @@
-import { Cartilla } from "../models/index.js";
+import Nutrcion from "../models/Controles/Nutricion.js";
+import { Antecedente, Cartilla, Cita, Estudio, SaludSexual, Vacuna } from "../models/index.js";
 
 const nuevaCartilla = async (req, res, next) => {
     try {
@@ -21,7 +22,17 @@ const mostrarCartillas = async (req, res, next) => {
 }
 
 const mostrarCartilla = async (req, res, next) => {
-    const cartilla = await Cartilla.findByPk(req.params.idCartilla);
+    const cartilla = await Cartilla.findByPk(req.params.idCartilla, {
+        include: [
+            {model: Antecedente },
+            {model: Cita},
+            {model: Estudio},
+            {model: Nutrcion},
+            {model: SaludSexual},
+            {model: Vacuna}
+        ]
+    }
+    );
 
     if(!cartilla) {
         res.json({mensaje : 'Esa cartilla no existe'});
