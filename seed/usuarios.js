@@ -16,7 +16,7 @@ const usuarios = [
         genero: 'Hombre',
         lugarNacimiento: 'Zumpango',
         cartillaId: 1,
-        entidadId: 1
+        domicilioId: 1
     },
     {
         nombre: 'Benito',
@@ -31,7 +31,7 @@ const usuarios = [
         genero: 'Hombre',
         lugarNacimiento: 'Xochimilco',
         cartillaId: 2,
-        entidadId: 2
+        domicilioId: 2
     },
     
     {
@@ -47,7 +47,7 @@ const usuarios = [
         genero: 'Mujer',
         lugarNacimiento: 'Benito Juarez',
         cartillaId: 3,
-        entidadId: 3
+        domicilioId: 3
     },
     {
         nombre: 'Daniel',
@@ -62,7 +62,7 @@ const usuarios = [
         genero: 'Hombre',
         lugarNacimiento: 'Texcoco',
         cartillaId: 4,
-        entidadId: 4
+        domicilioId: 4
     },
     
     {
@@ -78,7 +78,7 @@ const usuarios = [
         genero: 'Mujer',
         lugarNacimiento: 'Acolman',
         cartillaId: 5,
-        entidadId: 5
+        domicilioId: 5
     }
 ];
 

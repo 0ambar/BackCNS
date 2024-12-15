@@ -3,6 +3,7 @@ import Staff from './Staff.js';
 import Cartilla from './Cartilla.js';
 import EntidadFederativa from './EntidadFederativa.js';
 import Admin from './Admin.js';
+import Asentamiento from './Asentamiento.js';
 
 // IMPORTACION CONTROLES
 import Antecedente from './Controles/Antecente.js';
@@ -18,8 +19,7 @@ import Vacuna from './Controles/Vacuna.js'
 User.belongsTo(Cartilla, {foreignKey: 'cartillaId'});
 
 // Relacion para la entidad federativa de un usuario
-User.belongsTo(EntidadFederativa, {foreignKey: 'entidadId'});
-
+User.belongsTo(Asentamiento, {foreignKey: 'domicilioId'});
 
 // CARTILLAS
 Cartilla.belongsTo(Antecedente);
@@ -36,6 +36,7 @@ export {
     Cartilla,
     EntidadFederativa,
     Admin,
+    Asentamiento,
 
     Antecedente,
     Cita,

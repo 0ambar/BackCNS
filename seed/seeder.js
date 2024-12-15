@@ -42,15 +42,16 @@ const populateDatabase = async () => {
     let cont = 0;
 
     for (const line of lines) {
+
+      if(cont > 5){
+        break;
+      }
+      cont++;
+
       const [
         d_codigo, d_asenta, D_mnpio, d_estado, d_ciudad, c_mnpio,
         id_asenta_cpcons
       ] = line.split('|');
-
-      if(cont === 0){
-        console.log(line)
-        }
-        cont++;
 
       await Asentamiento.create({
         d_codigo, d_asenta, D_mnpio, d_estado, d_ciudad, c_mnpio,
@@ -79,7 +80,7 @@ const importarDatos = async () => {
         
         // Insertamos en la base de datos con promise porque son procesos independientes
         await Promise.all([
-          EntidadFederativa.bulkCreate(entidades), // Insertar estados de la republica
+          // EntidadFederativa.bulkCreate(entidades), // Insertar estados de la republica
           Cartilla.bulkCreate(cartillas),
           Staff.bulkCreate(trabajadores),
         ]);
@@ -137,6 +138,6 @@ if(process.argv[2] === '-e') {
 }
 
 
-if(process.argv[2] === '-p') {
+if(process.argv[2] === '-d') {
     populateDatabase();
 }

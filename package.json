@@ -8,7 +8,7 @@
     "server": "nodemon index.js",
     "db:importar": "node ./seed/seeder.js -i",
     "db:eliminar": "node ./seed/seeder.js -e",
-    "db:populate": "node ./seed/seeder.js -p"
+    "db:domicilios": "node ./seed/seeder.js -d"
   },
   "author": "",
   "license": "ISC",

@@ -1,4 +1,4 @@
-import { User, Cartilla, EntidadFederativa }from '../models/index.js'
+import { User, Cartilla, EntidadFederativa, Asentamiento }from '../models/index.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import dotenv from 'dotenv'
@@ -9,7 +9,7 @@ const mostrarPaciente = async (req, res, next) => {
     const paciente = await User.findByPk(req.params.idPaciente,{
         include: [
             { model: Cartilla },
-            { model: EntidadFederativa }
+            { model: Asentamiento }
         ]
     });
 
