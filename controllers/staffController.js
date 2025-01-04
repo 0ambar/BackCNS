@@ -1,5 +1,4 @@
-import { Staff, User }from '../models/index.js'
-import jwt from 'jsonwebtoken'
+import { Staff, User, Cartilla, Asentamiento }from '../models/index.js'
 import bcrypt from 'bcrypt'
 
 const nuevoColaborador = async (req, res, next) => {
@@ -20,8 +19,11 @@ const mostrarColaborador = async (req, res, next) => {
         res.json({mensaje : 'Ese usuario no existe'});
         return next();
     }
-    // Mostrar el trabajador
-    res.json(trabajador);
+    // Mostrar datos el trabajador
+    const trabajadorData = { ...trabajador.toJSON() };
+    delete trabajadorData.password;
+
+    res.json(trabajadorData);
 }
 
 const actualizarColaborador = async (req, res, next) => {
@@ -55,20 +57,9 @@ const actualizarColaborador = async (req, res, next) => {
         }, {
             where : { id : req.params.idUsuario }
         });
-
-        // firmar el token
-        const token = jwt.sign({
-            email : paciente.email, 
-            id : paciente.id,
-            curp: paciente.curp
-        }, 
-        process.env.SECRET, 
-        {
-            expiresIn : '24h'
-        }); 
         
         // retornar el TOKEN
-        res.json({token: token , mensaje: `Sus datos se han actualizado`});
+        res.json({mensaje: `Sus datos se han actualizado`});
 
     } catch (error) {
         res.send(error);
@@ -101,7 +92,12 @@ const mostrarPacientes = async (req, res, next) => {
 }
 
 const mostrarPaciente = async (req, res, next) => {
-    const paciente = await User.findByPk(req.params.idPaciente);
+    const paciente = await User.findByPk(req.params.idPaciente,{
+        include: [
+            { model: Cartilla },
+            { model: Asentamiento }
+        ]
+    });
 
     if (!paciente) {
         res.json({ mensaje: 'Ese paciente no existe' });
@@ -121,7 +117,7 @@ const mostrarPaciente = async (req, res, next) => {
 
         const edad = calcularEdad(paciente.fechaNacimiento);
 
-        // Mostrar el paciente con la edad calculada y sin contraseña
+        // Mostrar el paciente con la edad calculada 
         const pacienteData = { ...paciente.toJSON(), edad };
         delete pacienteData.password
         res.json(pacienteData);
