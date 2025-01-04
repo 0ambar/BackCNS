@@ -1,4 +1,4 @@
-import { User, Cartilla, EntidadFederativa, Asentamiento }from '../models/index.js'
+import { User, Cartilla, Asentamiento }from '../models/index.js'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import dotenv from 'dotenv'
@@ -31,7 +31,7 @@ const mostrarPaciente = async (req, res, next) => {
 
         const edad = calcularEdad(paciente.fechaNacimiento);
 
-        // Mostrar el paciente con la edad calculada y sin contraseña
+        // Mostrar el paciente con la edad calculada 
         const pacienteData = { ...paciente.toJSON(), edad };
         delete pacienteData.password
         delete pacienteData.createdAt; // Eliminar el campo que no quieres mostrar
@@ -88,7 +88,12 @@ const autenticarUsuario = async (req, res, next) => {
     // buscar el paciente   
     let { email, password } = req.body;
     email = email ? email : '';
-    const paciente = await User.findOne({ where : { email }});
+    password = password ? password : '';
+    const paciente = await User.findOne({ where : { email }}, {
+        include: [
+            {model: Cartilla}
+        ]
+    });
     
     if(!paciente) {
         res.status(401).json({mensaje : 'No eres un paciente registrado'});
@@ -101,18 +106,18 @@ const autenticarUsuario = async (req, res, next) => {
             next();
         } else {
             // password correcto, firmar el token
-            const token = jwt.sign({
-                email : paciente.email, 
-                id : paciente.id,
-                curp: paciente.curp
-            }, 
-            process.env.SECRET, 
-            {
-                expiresIn : '24h'
-            }); 
+            // const token = jwt.sign({
+            //     email : paciente.email, 
+            //     id : paciente.id,
+            //     curp: paciente.curp
+            // }, 
+            // process.env.SECRET, 
+            // {
+            //     expiresIn : '24h'
+            // }); 
             
             // retornar el TOKEN
-            res.json({ token });
+            res.json({ paciente });
         }
     }
 }
