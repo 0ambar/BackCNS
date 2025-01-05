@@ -17,34 +17,27 @@ const mostrarPaciente = async (req, res, next) => {
         res.json({ mensaje: 'Ese paciente no existe' });
         next();
     } else {
-        // Calcular la edad del paciente
-        const calcularEdad = (fechaNacimiento) => {
-            const hoy = new Date();
-            const nacimiento = new Date(fechaNacimiento);
-            let edad = hoy.getFullYear() - nacimiento.getFullYear();
-            const mes = hoy.getMonth() - nacimiento.getMonth();
-            if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
-                edad--;
-            }
-            return edad;
-        };
 
-        const edad = calcularEdad(paciente.fechaNacimiento);
+        const edad = paciente.calcularEdad(paciente.fechaNacimiento);
 
         // Mostrar el paciente con la edad calculada 
         const pacienteData = { ...paciente.toJSON(), edad };
         delete pacienteData.password
         delete pacienteData.createdAt; // Eliminar el campo que no quieres mostrar
         delete pacienteData.updatedAt; // Eliminar el campo que no quieres mostrar
-        res.json(pacienteData);
+        res.json({pacienteData, mensaje: 'Datos del paciente'});
     }
 }
 
 const actualizarPaciente = async (req, res, next) => {
 
     const { password, newEmail, newPassword } = req.body;
-    const paciente = await User.findByPk(req.params.idPaciente);
-    console.log(req.body);   
+    const paciente = await User.findByPk(req.params.idPaciente, {
+        include: [
+            { model: Cartilla },
+            { model: Asentamiento }
+        ]
+    });
     
     // El usuario existe, verificar si el password es correcto o incorrecto
     if(!paciente.verificarPassword(password ? password : '') || (!password)) {
@@ -53,30 +46,22 @@ const actualizarPaciente = async (req, res, next) => {
         return next();
     }            
 
-    
     const salt = await bcrypt.genSalt(10);
     const passwordHashed = await bcrypt.hash(( newPassword ? newPassword : password), salt);
-    console.log(newPassword)
-
     
     try {
         paciente.password = passwordHashed;
         paciente.email = newEmail ? newEmail : paciente.email;
         await paciente.save();
         
-        // firmar el token
-        const token = jwt.sign({
-            email : paciente.email, 
-            id : paciente.id,
-            curp: paciente.curp
-        }, 
-        process.env.SECRET, 
-        {
-            expiresIn : '24h'
-        }); 
-        
-        // retornar el TOKEN
-        res.json({token: token , mensaje: `Sus datos se han actualizado`});
+        const edad = paciente.calcularEdad(paciente.fechaNacimiento);
+
+        // Mostrar el paciente con la edad calculada 
+        const pacienteData = { ...paciente.toJSON(), edad };
+        delete pacienteData.password
+        delete pacienteData.createdAt; // Eliminar el campo que no quieres mostrar
+        delete pacienteData.updatedAt; // Eliminar el campo que no quieres mostrar
+        res.json({pacienteData, mensaje: `Sus datos se han actualizado`});
 
     } catch (error) {
         res.send(error);
