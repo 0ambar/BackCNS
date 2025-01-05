@@ -1,6 +1,7 @@
 import usuarios from "./usuarios.js";
 import cartillas from "./cartillas.js";
 import trabajadores from "./trabajadores.js";
+import admins from "./admins.js";
 
 // Controles de salud
 import antecedentes from "./Controles/antecedentes.js";
@@ -12,7 +13,7 @@ import vacunas from "./Controles/vacunas.js"
 
 import db from "../config/db.js";
 import { 
-  User, Cartilla, Staff, 
+  User, Cartilla, Staff, Admin,
   Antecedente, Cita, Estudio, Nutricion, SaludSexual, Vacuna
 } from "../models/index.js"
 
@@ -78,6 +79,7 @@ const importarDatos = async () => {
           // EntidadFederativa.bulkCreate(entidades), // Insertar estados de la republica
           Cartilla.bulkCreate(cartillas),
           Staff.bulkCreate(trabajadores),
+          Admin.bulkCreate(admins),
         ]);
         
         await Promise.all([
