@@ -29,37 +29,35 @@ const mostrarColaborador = async (req, res, next) => {
 const actualizarColaborador = async (req, res, next) => {
 
     const {
-        nombre,
-        apellidoPaterno,
-        apellidoMaterno,
-        email,
         password,
-        tipo,
-        estatus
+        newEmail,
+        newPassword
     } = req.body;
     
-    const paciente = await User.findByPk(req.params.idUsuario);
-
+    const trabajador = await Staff.findByPk(req.params.idUsuario);
+    
+    // El usuario existe, verificar si el password es correcto o incorrecto
+    if(!trabajador.verificarPassword(password ? password : '') || (!password)) {
+        res.json({mensaje : 'Password Incorrecto'});
+        next();
+    }
 
     const salt = await bcrypt.genSalt(10);
-    const passwordHashed = await bcrypt.hash(password, salt);
+    const passwordHashed = await bcrypt.hash(( newPassword ? newPassword : password), salt);
 
     
     try {
-        await Staff.update({
-            nombre,
-            apellidoPaterno,
-            apellidoMaterno,
-            email,
-            password : passwordHashed,
-            tipo,
-            estatus
-        }, {
-            where : { id : req.params.idUsuario }
-        });
-        
-        // retornar el TOKEN
-        res.json({mensaje: `Sus datos se han actualizado`});
+        // Actualizar los datos del trabajador
+        trabajador.password = passwordHashed;
+        trabajador.email = newEmail ? newEmail : trabajador.email;
+        await trabajador.save();
+
+        // Mostrar el trabajador con la edad calculada 
+        const trabajadorData = { ...trabajador.toJSON()};
+        delete trabajadorData.password
+        delete trabajadorData.createdAt; // Eliminar el campo que no quieres mostrar
+        delete trabajadorData.updatedAt; // Eliminar el campo que no quieres mostrar
+        res.json({trabajadorData, mensaje: `Datos del medico o enfermero se han actualizado`});
 
     } catch (error) {
         res.send(error);
