@@ -1,5 +1,4 @@
-import Nutrcion from "../models/Controles/Nutricion.js";
-import { Antecedente, Cartilla, Cita, Estudio, SaludSexual, Vacuna } from "../models/index.js";
+import { Antecedente, Cartilla, Cita, Estudio, Nutricion, SaludSexual, Vacuna } from "../models/index.js";
 
 const nuevaCartilla = async (req, res, next) => {
     try {
@@ -13,8 +12,7 @@ const nuevaCartilla = async (req, res, next) => {
 
 const mostrarCartillas = async (req, res, next) => {
     try {
-        // const cartillas = await Cartilla.findAll();
-        const cartillas = await Cartilla.getCitas({where: {id: 1}});
+        const cartillas = await Cartilla.findAll();
         res.json(cartillas);
     } catch (error) {
         console.log(error);
@@ -28,7 +26,7 @@ const mostrarCartilla = async (req, res, next) => {
             {model: Antecedente },
             {model: Cita},
             {model: Estudio},
-            {model: Nutrcion},
+            {model: Nutricion},
             {model: SaludSexual},
             {model: Vacuna}
         ]
@@ -46,15 +44,24 @@ const mostrarCartilla = async (req, res, next) => {
 const actualizarCartilla = async (req, res, next) => {
 
     const { tipo, observaciones } = req.body;
+    const cartilla = await Cartilla.findByPk(req.params.idCartilla);
+
+    if(!cartilla) {
+        res.json({mensaje : 'Cartilla no encontrada'});
+        return next();
+    }
+
+    tipo = tipo ? tipo : '';
+    observaciones = observaciones ? observaciones : '';
+
+
 
     try {
-        await Cartilla.update({
-            tipo,
-            observaciones
-        }, {
-            where: { id: req.params.idCartilla }
-        });
-        res.json({mensaje : 'Cartilla actualizada'});
+        cartilla.tipo = tipo ? tipo : cartilla.tipo;
+        cartilla.observaciones = observaciones ? observaciones : cartilla.observaciones;
+        await cartilla.save();
+        
+        res.json({cartilla, mensaje : 'Cartilla actualizada'});
     } catch (error) {
         res.send(error);
         next();
@@ -73,6 +80,32 @@ const eliminarCartilla = async (req, res, next) => {
     }
 }
 
+
+// ANTECEDENTES
+const nuevoAntecdedente = async (req, res, next) => {
+    const {cartillaId} = req.body;
+
+    try {
+        // Encuentra la cartilla por ID
+        const cartilla = await Cartilla.findByPk(cartillaId);
+
+        if (!cartilla) {
+            return res.json({ mensaje: 'Cartilla no encontrada para asignar antecedente' });
+        }
+
+        // Crea un nuevo antecedente
+        const antecedente = await Antecedente.create(req.body);
+
+        cartilla.antecedenteId = antecedente.id;
+        await cartilla.save();
+
+        res.json({antecedente, mensaje: 'Antecedente registrado exitosamente'});
+    } catch (error) {
+        console.error(error);
+        res.json({ mensaje: 'Error al agregar el antecedente' });
+        next();
+    }
+}
 
 
 // CITAS
@@ -257,11 +290,17 @@ const eliminarEstudio = async (req, res, next) => {
 };
 
 export {
-    nuevaCartilla,
-    mostrarCartillas,
     mostrarCartilla,
+    mostrarCartillas,
+    nuevaCartilla,
     actualizarCartilla,
     eliminarCartilla,
+
+    // ANTECEDENTES
+    nuevoAntecdedente,
+    mostrarAntecedente,
+    actualizarAntecedente,
+    eliminarAntecedente,
 
     // CITAS
     nuevaCita,
@@ -275,5 +314,26 @@ export {
     actualizarEstudio,
     mostrarEstudios,
     mostrarEstudio,
-    eliminarEstudio
+    eliminarEstudio,
+
+    // NUTRICION
+    mostrarNutriciones,
+    mostrarNutricion,
+    nuevaNutricion,
+    actualizarNutricion,
+    eliminarNutricion,
+
+    // SALUD SEXUAL
+    mostrarSexuales,
+    mostrarSexual,
+    nuevaSexual,
+    actualizarSexual,
+    eliminarSexual,
+
+    // VACUNAS
+    mostrarVacunas,
+    mostrarVacuna,
+    nuevaVacuna,
+    actualizarVacuna,
+    eliminarVacuna
 }
