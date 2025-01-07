@@ -43,7 +43,7 @@ const mostrarCartilla = async (req, res, next) => {
 
 const actualizarCartilla = async (req, res, next) => {
 
-    const { tipo, observaciones } = req.body;
+    const { tipo, observaciones, antecedenteId } = req.body;
     const cartilla = await Cartilla.findByPk(req.params.idCartilla);
 
     if(!cartilla) {
@@ -51,14 +51,10 @@ const actualizarCartilla = async (req, res, next) => {
         return next();
     }
 
-    tipo = tipo ? tipo : '';
-    observaciones = observaciones ? observaciones : '';
-
-
-
     try {
         cartilla.tipo = tipo ? tipo : cartilla.tipo;
         cartilla.observaciones = observaciones ? observaciones : cartilla.observaciones;
+        cartilla.antecedenteId = antecedenteId ? antecedenteId : cartilla.antecedenteId;
         await cartilla.save();
         
         res.json({cartilla, mensaje : 'Cartilla actualizada'});
@@ -83,26 +79,92 @@ const eliminarCartilla = async (req, res, next) => {
 
 // ANTECEDENTES
 const nuevoAntecdedente = async (req, res, next) => {
-    const {cartillaId} = req.body;
-
     try {
-        // Encuentra la cartilla por ID
-        const cartilla = await Cartilla.findByPk(cartillaId);
-
-        if (!cartilla) {
-            return res.json({ mensaje: 'Cartilla no encontrada para asignar antecedente' });
-        }
-
         // Crea un nuevo antecedente
         const antecedente = await Antecedente.create(req.body);
-
-        cartilla.antecedenteId = antecedente.id;
-        await cartilla.save();
 
         res.json({antecedente, mensaje: 'Antecedente registrado exitosamente'});
     } catch (error) {
         console.error(error);
         res.json({ mensaje: 'Error al agregar el antecedente' });
+        next();
+    }
+}
+
+const mostrarAntecedente = async (req, res, next) => {
+    try {
+        const cartilla = await Cartilla.findByPk(req.params.idCartilla, {
+            include: [
+                {model: Antecedente}
+            ]
+        });
+    
+        if(!Cartilla) {
+            res.json({mensaje: 'No se pudo encontrar la cartilla'});
+            return next();
+        }
+    
+        const antecedente = cartilla.antecedente;
+    
+        if(!antecedente) {
+            res.json({mensaje: 'La cartilla no cuenta con antecedentes asosiados'});
+            return next();
+        }
+
+        res.json(antecedente);
+
+    } catch (error) {
+        res.json(error);
+        return next();
+    }
+}
+
+const actualizarAntecedente = async (req, res, next) => {
+    const { 
+        alergias,
+        discapacidad,
+        cancer,
+        cirugias,
+        diabetes,
+        transfusiones,
+        otros
+    } = req.body;
+
+    try {
+        const antecedente = await Antecedente.findByPk(req.params.idAntecedente);
+
+        if(!antecedente) {
+            res.json({mensaje : 'Antecedente no encontrado'});
+            return next();
+        }
+
+        antecedente.alergias = alergias ? alergias : antecedente.alergias;
+        antecedente.discapacidad = discapacidad ? discapacidad : antecedente.discapacidad;
+        antecedente.cancer = cancer ? cancer : antecedente.cancer;
+        antecedente.cirugias = cirugias ? cirugias : antecedente.cirugias;
+        antecedente.diabetes = diabetes ? diabetes : antecedente.diabetes;
+        antecedente.transfusiones = transfusiones ? transfusiones : antecedente.transfusiones;
+        antecedente.otros = otros ? otros : antecedente.otros;
+
+        // Guardar el antecedente actualizado
+        await antecedente.save();
+
+        res.json({antecedente, mensaje : 'Antecedente actualizado'});
+
+    } catch (error) {
+        res.json(error);
+        return next();
+    }
+}
+
+const eliminarAntecedente = async (req, res, next) => {
+    try {
+        await Antecedente.destroy({
+            where: { id: req.params.idAntecedente }
+        });
+        res.json({mensaje : 'Antecedente eliminado'});
+    } catch (error) {
+        res.send(error);
         next();
     }
 }
@@ -288,6 +350,307 @@ const eliminarEstudio = async (req, res, next) => {
         next();
     }
 };
+
+
+// NUTRICION
+const mostrarNutriciones = async (req, res, next) => {
+    try {
+        const nutriciones = await Nutricion.findAll({where: {cartillaId: req.params.idCartilla}});
+
+        if(!nutriciones) {
+            res.json({mensaje : 'Sin registros de nutricion en la cartilla'});
+            next();
+        }
+        // Mostrar los registros de nutricion
+        res.json(nutriciones);
+    } catch (error) {
+        console.error(error);
+        res.json({mensaje : 'Error al mostrar los registros de nutricion'});
+        next();
+    }
+}
+
+const mostrarNutricion = async (req, res, next) => {
+    const nutricion = await Nutricion.findByPk(req.params.idNutricion);
+
+    if(!nutricion) {
+        res.json({mensaje : 'Registro de nutricion no encontrado'});
+        return next();
+    }
+    // Mostrar el registro de nutricion
+    res.json(nutricion);
+}
+
+const nuevaNutricion = async (req, res, next) => {
+    const { cartillaId, fecha, peso, estatura, imc } = req.body;
+
+    try {
+        // Encuentra la cartilla por ID
+        const cartilla = await Cartilla.findByPk(cartillaId);
+
+        if (!cartilla) {
+            return res.json({ mensaje: 'Cartilla no encontrada' });
+        }
+
+        // Crea un nuevo registro de nutricion
+        await Nutricion.create({
+            fecha,
+            peso,
+            estatura,
+            imc,
+            cartillaId
+        });
+
+        res.json({mensaje: 'Registro de nutricion registrado exitosamente'});
+    } catch (error) {
+        console.error(error);
+        res.json({ mensaje: 'Error al agregar el registro de nutricion' });
+        return next();
+    }
+}
+
+const actualizarNutricion = async (req, res, next) => {
+    const { fecha, peso, estatura, imc } = req.body;
+
+    try {
+        const nutricion = await Nutricion.findByPk(req.params.idNutricion);
+
+        if (!nutricion) {
+            return res.json({ mensaje: 'Registro de nutricion no encontrado' });
+        }
+
+        nutricion.fecha = fecha;
+        nutricion.peso = peso;
+        nutricion.estatura = estatura;
+        nutricion.imc = imc;
+
+        // Guardar el registro de nutricion actualizado
+        await nutricion.save();
+         
+        res.json({nutricion, mensaje: 'Registro de nutricion actualizado exitosamente'});
+    } catch (error) {
+        console.error(error);
+        res.json({ mensaje: 'Error al actualizar el registro de nutricion' });
+        return next();
+    }
+}
+
+const eliminarNutricion = async (req, res, next) => {
+    try {
+        await Nutricion.destroy({
+            where: { id: req.params.idNutricion }
+        });
+
+        res.json({ mensaje: 'Registro de nutricion eliminado' });
+    } catch (error) {
+        console.error(error);
+        res.json({ mensaje: 'Error al eliminar el registro de nutricion' });
+        return next();
+    }
+}
+
+
+// SALUD SEXUAL
+const mostrarSexuales = async (req, res, next) => {
+    try {
+        const sexuales = await SaludSexual.findAll({where: {cartillaId: req.params.idCartilla
+        }});
+        if(!sexuales) {
+            res.json({mensaje : 'Sin registros de salud sexual en la cartilla'});
+            next();
+        }
+        // Mostrar los registros de salud sexual
+        res.json(sexuales);
+
+    } catch (error) {
+        console.error(error);
+        res.json({mensaje : 'Error al mostrar los registros de salud sexual'});
+        next();
+    }
+}
+
+const mostrarSexual = async (req, res, next) => {
+    const sexual = await SaludSexual.findByPk(req.params.idSexual);
+
+    if(!sexual) {
+        res.json({mensaje : 'Registro de salud sexual no encontrado'});
+        return next();
+    }
+    // Mostrar el registro de salud sexual
+    res.json(sexual);
+}
+
+const nuevaSexual = async (req, res, next) => {
+    const { 
+        cartillaId
+    } = req.body;
+
+    try {
+        // Encuentra la cartilla por ID
+        const cartilla = await Cartilla.findByPk(cartillaId);
+
+        if (!cartilla) {
+            return res.json({ mensaje: 'Cartilla no encontrada' });
+        }
+
+        await SaludSexual.create(req.body);
+
+        res.json({mensaje : 'Registro de salud sexual agregado'});
+    } catch (error) {
+        console.error(error);
+        res.json({mensaje : 'Error al agregar el registro de salud sexual'});
+        return next();
+    }
+}
+
+const actualizarSexual = async (req, res, next) => {
+    const { 
+        cartillaId,
+        accion,
+        fecha,
+        tipo,
+        observaciones
+    } = req.body;
+
+    try {
+        const sexual = await SaludSexual.findByPk(req.params.idSexual);
+
+        if (!sexual) {
+            return res.json({ mensaje: 'Registro de salud sexual no encontrado' });
+        }
+
+        sexual.cartillaId = cartillaId;
+        sexual.accion = accion;
+        sexual.fecha = fecha;
+        sexual.tipo = tipo;
+        sexual.observaciones = observaciones? observaciones : sexual.observaciones
+
+        // Guardar el registro de salud sexual actualizado
+        await sexual.save();
+         
+        res.json({sexual, mensaje : 'Registro de salud sexual actualizado'});
+    } catch (error) {
+        console.error(error);
+        res.json({mensaje : 'Error al actualizar el registro de salud sexual'});
+        return next();
+    }
+}
+
+const eliminarSexual = async (req, res, next) => {
+    try {
+        await SaludSexual.destroy({
+            where: { id: req.params.idSexual }
+        });
+
+        res.json({mensaje : 'Registro de salud sexual eliminado'});
+    } catch (error) {
+        console.error(error);
+        res.json({mensaje : 'Error al eliminar el registro de salud sexual'});
+        return next();
+    }
+}
+
+
+// VACUNAS
+const mostrarVacunas = async (req, res, next) => {
+    try {
+        const vacunas = await Vacuna.findAll({where: {cartillaId: req.params.idCartilla}});
+
+        if(!vacunas) {
+            res.json({mensaje : 'Sin registros de vacunas en la cartilla'});
+            next();
+        }
+        // Mostrar los registros de vacunas
+        res.json(vacunas);
+    } catch (error) {
+        console.error(error);
+        res.json({mensaje : 'Error al mostrar los registros de vacunas'});
+        next();
+    }
+}
+
+const mostrarVacuna = async (req, res, next) => {
+    const vacuna = await Vacuna.findByPk(req.params.idVacuna);
+
+    if(!vacuna) {
+        res.json({mensaje : 'Registro de vacuna no encontrado'});
+        return next();
+    }
+    // Mostrar el registro de vacuna
+    res.json(vacuna);
+}
+
+const nuevaVacuna = async (req, res, next) => {
+    const { 
+        cartillaId
+    } = req.body;
+
+    try {
+        // Encuentra la cartilla por ID
+        const cartilla = await Cartilla.findByPk(cartillaId);
+
+        if (!cartilla) {
+            return res.json({ mensaje: 'Cartilla no encontrada' });
+        }
+
+        await Vacuna.create(req.body);
+
+        res.json({mensaje : 'Registro de vacuna agregado'});
+    } catch (error) {
+        console.error(error);
+        res.json({mensaje : 'Error al agregar el registro de vacuna'});
+        return next();
+    }
+}
+
+const actualizarVacuna = async (req, res, next) => {
+    const { 
+        cartillaId,
+        vacuna,
+        dosis,
+        fecha,
+        lote
+    } = req.body;
+
+    try {
+        const vacine = await Vacuna.findByPk(req.params.idVacuna);
+
+        if (!vacine) {
+            return res.json({ mensaje: 'Registro de vacuna no encontrado' });
+        }
+
+        vacine.cartillaId = cartillaId;
+        vacine.vacuna = vacuna;
+        vacine.dosis = dosis;
+        vacine.fecha = fecha;
+        vacine.lote = lote;
+
+        // Guardar el registro de vacuna actualizado
+        await vacine.save();
+         
+        res.json({vacuna, mensaje : 'Registro de vacuna actualizado'});
+    } catch (error) {
+        console.error(error);
+        res.json({mensaje : 'Error al actualizar el registro de vacuna'});
+        return next();
+    }
+}
+
+const eliminarVacuna = async (req, res, next) => {
+    try {
+        await Vacuna.destroy({
+            where: { id: req.params.idVacuna }
+        });
+
+        res.json({mensaje : 'Registro de vacuna eliminado'});
+    } catch (error) {
+        console.error(error);
+        res.json({mensaje : 'Error al eliminar el registro de vacuna'});
+        return next();
+    }
+}
+
+
 
 export {
     mostrarCartilla,
