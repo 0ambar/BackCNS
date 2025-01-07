@@ -70,6 +70,9 @@ const actualizarColaborador = async (req, res, next) => {
 // FUNCIONES PARA DATOS DE PACIENTES
 
 const nuevoPaciente = async (req, res, next) => {
+    // Transformar el email a minusculas
+    req.body.email = req.body.email.toLowerCase();
+
     try {
         await User.create(req.body);
         res.json({mensaje : 'Se agrego un nuevo paciente'});
@@ -82,7 +85,15 @@ const nuevoPaciente = async (req, res, next) => {
 const mostrarPacientes = async (req, res, next) => {
     try {
         const pacientes = await User.findAll();
-        res.json(pacientes);
+
+        // Elimina la contraseña de los pacientes del resultado
+        const pacientesData = pacientes.map(paciente => {
+            const pacienteData = { ...paciente.toJSON() };
+            delete pacienteData.password; 
+            return pacienteData;
+        });
+
+        res.json(pacientesData);
     } catch (error) {
         console.log(error);
         next();
@@ -102,18 +113,7 @@ const mostrarPaciente = async (req, res, next) => {
         next();
     } else {
         // Calcular la edad del paciente
-        const calcularEdad = (fechaNacimiento) => {
-            const hoy = new Date();
-            const nacimiento = new Date(fechaNacimiento);
-            let edad = hoy.getFullYear() - nacimiento.getFullYear();
-            const mes = hoy.getMonth() - nacimiento.getMonth();
-            if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
-                edad--;
-            }
-            return edad;
-        };
-
-        const edad = calcularEdad(paciente.fechaNacimiento);
+        const edad = paciente.calcularEdad(paciente.fechaNacimiento);
 
         // Mostrar el paciente con la edad calculada 
         const pacienteData = { ...paciente.toJSON(), edad };
@@ -122,8 +122,9 @@ const mostrarPaciente = async (req, res, next) => {
     }
 }
 
-const actualizarPaciente = async (req, res, next) => {
 
+const actualizarPaciente = async (req, res, next) => {
+    
     const {
         nombre,
         apellidoPaterno,
@@ -140,10 +141,10 @@ const actualizarPaciente = async (req, res, next) => {
         cartillaId,
         entidadId
     } = req.body;
-
+    
     const salt = await bcrypt.genSalt(10);
     const passwordHashed = await bcrypt.hash(password, salt);
-
+    
     
     try {
         await User.update({

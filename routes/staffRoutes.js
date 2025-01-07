@@ -11,8 +11,6 @@ import {
     actualizarColaborador,
 } from "../controllers/staffController.js";
 
-import auth from "../middleware/auth.js";
-
 const router = express.Router();
 
 // Obtener todos los pacientes
@@ -20,7 +18,6 @@ router.get('/ver-pacientes', mostrarPacientes);
 
 // Agrega nuevos pacientes via POST
 router.post('/registrar-paciente', nuevoPaciente);
-
 
 // Muestra un paciente en especifico 
 router.get('/ver-paciente/:idPaciente', mostrarPaciente);

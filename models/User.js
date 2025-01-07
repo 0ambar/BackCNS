@@ -59,6 +59,13 @@ const Usuario = db.define('usuario', {
         allowNull: false
     },
 
+    // Campo para indicar que es un paciente
+    tipo: {
+        type: DataTypes.STRING,
+        defaultValue: 'paciente',
+        allowNull: false
+    },
+
     // Si la cuenta del usuario esta activa o no
     estatus: DataTypes.BOOLEAN, 
 }, 

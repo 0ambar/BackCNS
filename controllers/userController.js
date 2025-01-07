@@ -1,5 +1,4 @@
-import { User, Cartilla, Asentamiento }from '../models/index.js'
-import jwt from 'jsonwebtoken'
+import { User, Staff, Admin, Cartilla, Asentamiento }from '../models/index.js'
 import bcrypt from 'bcrypt'
 import dotenv from 'dotenv'
 
@@ -25,7 +24,7 @@ const mostrarPaciente = async (req, res, next) => {
         delete pacienteData.password
         delete pacienteData.createdAt; // Eliminar el campo que no quieres mostrar
         delete pacienteData.updatedAt; // Eliminar el campo que no quieres mostrar
-        res.json({pacienteData, mensaje: 'Datos del paciente'});
+        res.json(pacienteData);
     }
 }
 
@@ -51,7 +50,7 @@ const actualizarPaciente = async (req, res, next) => {
     
     try {
         paciente.password = passwordHashed;
-        paciente.email = newEmail ? newEmail : paciente.email;
+        paciente.email = newEmail ? newEmail.toLowerCase() : paciente.email;
         await paciente.save();
         
         const edad = paciente.calcularEdad(paciente.fechaNacimiento);
@@ -69,42 +68,60 @@ const actualizarPaciente = async (req, res, next) => {
     }
 }
 
-const autenticarUsuario = async (req, res, next) => { 
-    // buscar el paciente   
+// FUNCIONES PARA CONTROLES DE CARTILLAS
+const autenticarUsuario = async (req, res, next) => {
     let { email, password } = req.body;
-    email = email ? email : '';
+    email = email ? email.toLowerCase() : '';
     password = password ? password : '';
-    const paciente = await User.findOne({ where : { email }}, {
-        include: [
-            {model: Cartilla}
-        ]
-    });
-    
-    if(!paciente) {
-        res.status(401).json({mensaje : 'No eres un paciente registrado'});
-        return next();
-    } else {
-        // El usuario existe, verificar si el password es correcto o incorrecto
-        if(!bcrypt.compareSync(password, paciente.password )) {
-            // si el password es incorrecto
-            await res.status(401).json({ mensaje : 'Password Incorrecto'});
-            next();
-        } else {
-            // password correcto, firmar el token
-            // const token = jwt.sign({
-            //     email : paciente.email, 
-            //     id : paciente.id,
-            //     curp: paciente.curp
-            // }, 
-            // process.env.SECRET, 
-            // {
-            //     expiresIn : '24h'
-            // }); 
+
+    const encontrarUsuario = async (email) => {
+        try {
+            const user = await User.findOne({ where: { email } });
+            if (user) return user
+
+            const staff = await Staff.findOne({ where: { email } });
+            if (staff) return staff
+
+            const admin = await Admin.findOne({ where: { email } });
+            if (admin) return admin
             
-            // retornar el TOKEN
-            res.json({ paciente });
+            // Si no se encuentra el usuario 
+            return null;
+        } catch (error) {
+            res.send(error);
+            next();
         }
     }
+
+    encontrarUsuario(email).then(usuario => {
+        if (!usuario) {
+            res.status(401).json({ mensaje: 'Ese usuario no existe' });
+            return next();
+        }
+
+        if (!usuario.verificarPassword(password)) {
+            res.status(401).json({ mensaje: 'Password Incorrecto' });
+            return next();
+        }
+
+        const { 
+            id, 
+            nombre, 
+            apellidoPaterno,
+            apellidoMaterno,
+            email,
+            tipo,
+        } = usuario;
+
+        res.json({
+            id, 
+            nombre, 
+            apellidoPaterno,
+            apellidoMaterno,
+            email,
+            tipo,
+        });
+    });
 }
 
 
