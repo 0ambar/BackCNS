@@ -9,6 +9,8 @@ import {
     nuevoColaborador,
     mostrarColaborador,
     actualizarColaborador,
+
+    consultaDomicilio,
 } from "../controllers/staffController.js";
 
 const router = express.Router();
@@ -28,6 +30,9 @@ router.put('/actuaizar-paciente/:idPaciente', actualizarPaciente)
 // Elimnar paciente por su ID
 router.delete('/eliminar-paciente/:idPaciente', eliminarPaciente);
 
+
+// Consultar domicilios de la BD
+router.get('/domicilios/:codigoPostal', consultaDomicilio);
 
 
 // Agrega nuevo trabajador via POST

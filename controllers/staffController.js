@@ -13,17 +13,24 @@ const nuevoColaborador = async (req, res, next) => {
 
 
 const mostrarColaborador = async (req, res, next) => {
-    const trabajador = await Staff.findByPk(req.params.idUsuario);
-
-    if(!trabajador) {
-        res.json({mensaje : 'Ese usuario no existe'});
+    try {
+        const trabajador = await Staff.findByPk(req.params.idUsuario);
+    
+        if(!trabajador) {
+            res.json({mensaje : 'Ese usuario no existe'});
+            return next();
+        }
+        // Mostrar datos el trabajador
+        const trabajadorData = { ...trabajador.toJSON() };
+        delete trabajadorData.password;
+    
+        res.json(trabajadorData);
+        
+    } catch (error) {
+        console.error(error);
+        res.json({mensaje : 'Error en la consulta'});
         return next();
     }
-    // Mostrar datos el trabajador
-    const trabajadorData = { ...trabajador.toJSON() };
-    delete trabajadorData.password;
-
-    res.json(trabajadorData);
 }
 
 const actualizarColaborador = async (req, res, next) => {
@@ -68,7 +75,6 @@ const actualizarColaborador = async (req, res, next) => {
 
 
 // FUNCIONES PARA DATOS DE PACIENTES
-
 const nuevoPaciente = async (req, res, next) => {
     // Transformar el email a minusculas
     req.body.email = req.body.email.toLowerCase();
@@ -187,6 +193,21 @@ const eliminarPaciente = async (req, res, next) => {
     }
 }
 
+const consultaDomicilio = async (req, res, next) => {
+    try {
+        const asentamiento = await Asentamiento.findAll({ where : { d_codigo : req.params.codigoPostal }});
+        if(!asentamiento || asentamiento.length === 0) {
+            res.json({mensaje : 'Ese codigo postal no existe'});
+            return next();
+        }
+        res.json(asentamiento);
+    } catch (error) {
+        console.log(error);
+        res.json({mensaje : 'Error en la consulta de domicilio'});
+        return next();
+    }
+}
+
 // export nombrado
 export {
     nuevoColaborador,
@@ -198,4 +219,6 @@ export {
     mostrarPaciente,
     actualizarPaciente,
     eliminarPaciente,
+
+    consultaDomicilio,
 }
