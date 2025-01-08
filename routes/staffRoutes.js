@@ -1,5 +1,7 @@
 import express from "express";
 import {
+    subirArchivo, 
+
     nuevoPaciente,
     mostrarPacientes,
     mostrarPaciente,
@@ -19,7 +21,7 @@ const router = express.Router();
 router.get('/ver-pacientes', mostrarPacientes);
 
 // Agrega nuevos pacientes via POST
-router.post('/registrar-paciente', nuevoPaciente);
+router.post('/registrar-paciente', subirArchivo, nuevoPaciente);
 
 // Muestra un paciente en especifico 
 router.get('/ver-paciente/:idPaciente', mostrarPaciente);

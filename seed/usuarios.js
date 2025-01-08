@@ -15,6 +15,7 @@ const usuarios = [
         fechaNacimiento: '1971-01-01',
         genero: 'Hombre',
         lugarNacimiento: 'Zumpango, Estado de México',
+        foto: 'avatar1.png',
         cartillaId: 1,
         domicilioId: 1
     },
@@ -30,6 +31,7 @@ const usuarios = [
         fechaNacimiento: '2019-01-02',
         genero: 'Hombre',
         lugarNacimiento: 'Xochimilco, Ciudad de México',
+        foto: 'avatar2.png',
         cartillaId: 2,
         domicilioId: 2
     },
@@ -46,6 +48,7 @@ const usuarios = [
         fechaNacimiento: '2013-01-03',
         genero: 'Mujer',
         lugarNacimiento: 'Benito Juarez, Ciudad de México',
+        foto: 'avatar3.png',
         cartillaId: 3,
         domicilioId: 3
     },
@@ -61,6 +64,7 @@ const usuarios = [
         fechaNacimiento: '1960-01-04',
         genero: 'Hombre',
         lugarNacimiento: 'Texcoco, Estado de México',
+        foto: 'avatar4.png',
         cartillaId: 4,
         domicilioId: 4
     },
@@ -77,6 +81,7 @@ const usuarios = [
         fechaNacimiento: '1980-01-05',
         genero: 'Mujer',
         lugarNacimiento: 'Acolman, Estado de México',
+        foto: 'avatar1.png',
         cartillaId: 5,
         domicilioId: 5
     }

@@ -68,6 +68,11 @@ const Usuario = db.define('usuario', {
 
     // Si la cuenta del usuario esta activa o no
     estatus: DataTypes.BOOLEAN, 
+
+    foto: {
+        type: DataTypes.STRING,
+        defaultValue: 'avatar.png'
+    }
 }, 
     
     // Funcion para encriptar la contraseña del usuario
