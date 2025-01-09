@@ -1,6 +1,8 @@
 import { User, Staff, Admin, Cartilla, Asentamiento }from '../models/index.js'
 import bcrypt from 'bcrypt'
 import dotenv from 'dotenv'
+import { generarId } from '../helpers/token.js';
+import { emailOlvidePassword } from '../helpers/emails.js';
 
 dotenv.config({path: '.env'});
 
@@ -125,10 +127,66 @@ const autenticarUsuario = async (req, res, next) => {
 }
 
 
+const resetPassword = async (req, res, next) => {
+    let { email, password } = req.body;
+    email = email ? email.toLowerCase() : '';
+    password = password ? password : '';
+
+    const encontrarUsuario = async (email) => {
+        try {
+            const user = await User.findOne({ where: { email } });
+            if (user) return user
+
+            const staff = await Staff.findOne({ where: { email } });
+            if (staff) return staff
+
+            const admin = await Admin.findOne({ where: { email } });
+            if (admin) return admin
+            
+            // Si no se encuentra el usuario 
+            return null;
+        } catch (error) {
+            res.send(error);
+            next();
+        }
+    }
+
+    encontrarUsuario(email).then(async usuario => {
+        if (!usuario) {
+            res.status(401).json({ mensaje: 'Ese usuario no existe' });
+            return next();
+        }
+
+        if (!usuario.verificarPassword(password)) {
+            res.status(401).json({ mensaje: 'Password Incorrecto' });
+            return next();
+        }
+
+        const token = generarId();
+    
+        const salt = await bcrypt.genSalt(10)
+        const passwordHashed = await bcrypt.hash(token, salt);
+        usuario.password = passwordHashed;
+    
+        await usuario.save();
+    
+        // Enviar el token por correo
+        emailOlvidePassword({
+            nombre: usuario.nombre, 
+            email: usuario.email, 
+            token
+        });
+    
+        res.json({ mensaje: 'Se ha enviado un correo con una contraseña temporal' });    
+    });
+
+}
+
 
 // export nombrado
 export {
     mostrarPaciente,
     actualizarPaciente,
-    autenticarUsuario
+    autenticarUsuario,
+    resetPassword
 }

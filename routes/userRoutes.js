@@ -2,7 +2,8 @@ import express from "express";
 import {
     mostrarPaciente,
     actualizarPaciente,
-    autenticarUsuario
+    autenticarUsuario,
+    resetPassword
 } from "../controllers/userController.js";
 
 import auth from "../middleware/auth.js";
@@ -17,5 +18,8 @@ router.put('/:idPaciente', actualizarPaciente);
 
 // Iniciar sesion
 router.post('/login', autenticarUsuario);
+
+// Resetear contraseña
+router.post('/reset-password', resetPassword);
 
 export default router
