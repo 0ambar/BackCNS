@@ -128,9 +128,8 @@ const autenticarUsuario = async (req, res, next) => {
 
 
 const resetPassword = async (req, res, next) => {
-    let { email, password } = req.body;
+    let { email } = req.body;
     email = email ? email.toLowerCase() : '';
-    password = password ? password : '';
 
     const encontrarUsuario = async (email) => {
         try {
@@ -157,18 +156,7 @@ const resetPassword = async (req, res, next) => {
             return next();
         }
 
-        if (!usuario.verificarPassword(password)) {
-            res.status(401).json({ mensaje: 'Password Incorrecto' });
-            return next();
-        }
-
         const token = generarId();
-    
-        const salt = await bcrypt.genSalt(10)
-        const passwordHashed = await bcrypt.hash(token, salt);
-        usuario.password = passwordHashed;
-    
-        await usuario.save();
     
         // Enviar el token por correo
         emailOlvidePassword({
@@ -182,11 +170,61 @@ const resetPassword = async (req, res, next) => {
 
 }
 
+const confirmaResetPassword = async (req, res, next) => {
+    let { email, token } = req.params;
+    email = email ? email.toLowerCase() : '';
+    token = token ? token : '';
+
+
+    if(token.length === 0) {
+        res.status(401).send({ mensaje: 'Token no válido' });
+        return next();
+    }
+
+    const encontrarUsuario = async (email) => {
+        try {
+            const user = await User.findOne({ where: { email } });
+            if (user) return user
+
+            const staff = await Staff.findOne({ where: { email } });
+            if (staff) return staff
+
+            const admin = await Admin.findOne({ where: { email } });
+            if (admin) return admin
+            
+            // Si no se encuentra el usuario 
+            return null;
+        } catch (error) {
+            res.send(error);
+            next();
+        }
+    }
+
+    encontrarUsuario(email).then(async usuario => {
+        if (!usuario) {
+            res.send({ mensaje: 'Ese usuario no existe' });
+            return next();
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const passwordHashed = await bcrypt.hash(token, salt);
+
+        usuario.password = passwordHashed;
+        usuario.save();
+
+        res.send(`Se ha actualizado la contraseña de ${usuario.email}: ${token}`);
+        
+        // res.json(`Se ha actualizado la contraseña de ${usuario.email}: ${token}`);
+        
+    });
+}
+
 
 // export nombrado
 export {
     mostrarPaciente,
     actualizarPaciente,
     autenticarUsuario,
-    resetPassword
+    resetPassword, 
+    confirmaResetPassword
 }

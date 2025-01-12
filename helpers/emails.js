@@ -20,11 +20,16 @@ const emailOlvidePassword = async (datos) => {
         to: email,
         subject: 'Reestablece tu constraseña en cnsdigital.com',
         text: 'Reestablece tu constraseña en Cartilla Nacional de Salud Digital',
-        html:`
+        html: `
             <p> Hola ${nombre}, has solicitado reestablecer tu constraseña en cnsdigital.com </p>
 
-            <p> Se ha generado un contraseña temporal con la que podras ingresar a tu cuenta </p>
-            <p><strogn>${token}</strong></p>
+            <p> La siguiente es tu contraseña temporal con la que podras ingresar a tu cuenta </p>
+
+            <p><strong>${token}</strong></p>
+
+            <p> Da click en el siguiente enlace y asegurate de guardar la nueva contraseña en un lugar seguro para poder acceder a tu cuenta </p>
+            
+            <a href="${process.env.BACKEND_URL}:${process.env.PORT ?? 3000}/usuario/reset-password/${email}/${token}" style="display: inline-block; padding: 10px 20px; font-size: 16px; color: #ffffff; background-color: #007bff; text-decoration: none; border-radius: 5px;">Confirmar</a>
 
             <p> Si tu no solicitaste el cambio de contraseña, puedes ignorar este email </p>
         `
