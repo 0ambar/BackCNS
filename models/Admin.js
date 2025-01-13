@@ -31,7 +31,7 @@ const Admin = db.define('admin', {
 
     
     tipo: {
-        type: DataTypes.STRING,
+        type: DataTypes.ENUM ('superAdmin', 'admin'),
         allowNull: false
     },
     

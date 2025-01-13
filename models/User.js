@@ -59,8 +59,20 @@ const Usuario = db.define('usuario', {
         allowNull: false
     },
 
+    // Campo para indicar que es un paciente
+    tipo: {
+        type: DataTypes.STRING,
+        defaultValue: 'paciente',
+        allowNull: false
+    },
+
     // Si la cuenta del usuario esta activa o no
     estatus: DataTypes.BOOLEAN, 
+
+    foto: {
+        type: DataTypes.STRING,
+        defaultValue: 'avatar.png'
+    }
 }, 
     
     // Funcion para encriptar la contraseña del usuario
@@ -78,5 +90,16 @@ const Usuario = db.define('usuario', {
 Usuario.prototype.verificarPassword = function(password) {
     return bcrypt.compareSync(password, this.password);
 }
+
+Usuario.prototype.calcularEdad = function (fechaNacimiento) {
+    const hoy = new Date();
+    const nacimiento = new Date(fechaNacimiento);
+    let edad = hoy.getFullYear() - nacimiento.getFullYear();
+    const mes = hoy.getMonth() - nacimiento.getMonth();
+    if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
+        edad--;
+    }
+    return edad;
+};
 
 export default Usuario

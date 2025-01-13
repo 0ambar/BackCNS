@@ -1,7 +1,7 @@
-import entidades from "./entidades.js";
 import usuarios from "./usuarios.js";
 import cartillas from "./cartillas.js";
 import trabajadores from "./trabajadores.js";
+import admins from "./admins.js";
 
 // Controles de salud
 import antecedentes from "./Controles/antecedentes.js";
@@ -13,17 +13,14 @@ import vacunas from "./Controles/vacunas.js"
 
 import db from "../config/db.js";
 import { 
-  EntidadFederativa, User, Cartilla, Staff, 
+  User, Cartilla, Staff, Admin,
   Antecedente, Cita, Estudio, Nutricion, SaludSexual, Vacuna
 } from "../models/index.js"
 
 
-// scripts/populateDatabase.js
 import fs from 'fs';
 import path from 'path';
 import Asentamiento from '../models/Asentamiento.js';
-import { promises } from "dns";
-import Nutrcion from "../models/Controles/Nutricion.js";
 
 const dirname = path.dirname(new URL(import.meta.url).pathname).substring(1);
 const filePath = path.join(dirname, 'CPdescarga.txt');
@@ -43,19 +40,18 @@ const populateDatabase = async () => {
 
     for (const line of lines) {
 
-      if(cont > 5){
+      if(cont > 20){
         break;
       }
       cont++;
 
       const [
-        d_codigo, d_asenta, D_mnpio, d_estado, d_ciudad, c_mnpio,
-        id_asenta_cpcons
+        d_codigo, d_asenta, d_tipo_asenta, D_mnpio, d_estado, d_ciudad, d_CP, c_estado, 
+        c_oficina, c_CP, c_tipo_asenta, c_mnpio, id_asenta_cpcons, d_zona, c_cve_ciudad
       ] = line.split('|');
 
       await Asentamiento.create({
-        d_codigo, d_asenta, D_mnpio, d_estado, d_ciudad, c_mnpio,
-        id_asenta_cpcons
+        d_codigo, d_asenta, D_mnpio, d_estado, d_ciudad
       });
     }
     
@@ -83,6 +79,7 @@ const importarDatos = async () => {
           // EntidadFederativa.bulkCreate(entidades), // Insertar estados de la republica
           Cartilla.bulkCreate(cartillas),
           Staff.bulkCreate(trabajadores),
+          Admin.bulkCreate(admins),
         ]);
         
         await Promise.all([
@@ -104,15 +101,9 @@ const importarDatos = async () => {
     }
 }
 
-// Funcion para eliminar datos en las tablas 'precios' y 'categorias'
+// Funcion para eliminar datos en las tablas
 const eliminarDatos = async () => {
     try {
-        // Con promise porque son procesos independientes
-        // await Promise.all([
-        //     Categoria.destroy({where: {}, truncate: true}), 
-        //     Precio.destroy({where: {}, truncate: true}) 
-        // ]);
-
         await db.sync({force: true});
     
         console.log('Datos eliminados correctamente');

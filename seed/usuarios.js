@@ -14,7 +14,8 @@ const usuarios = [
         domicilio: 'Calle 1 #123',
         fechaNacimiento: '1971-01-01',
         genero: 'Hombre',
-        lugarNacimiento: 'Zumpango',
+        lugarNacimiento: 'Zumpango, Estado de México',
+        foto: 'avatar.png',
         cartillaId: 1,
         domicilioId: 1
     },
@@ -29,7 +30,8 @@ const usuarios = [
         domicilio: 'Calle 2 #456',
         fechaNacimiento: '2019-01-02',
         genero: 'Hombre',
-        lugarNacimiento: 'Xochimilco',
+        lugarNacimiento: 'Xochimilco, Ciudad de México',
+        foto: 'avatar.png',
         cartillaId: 2,
         domicilioId: 2
     },
@@ -45,7 +47,8 @@ const usuarios = [
         domicilio: 'Calle 3 #789',
         fechaNacimiento: '2013-01-03',
         genero: 'Mujer',
-        lugarNacimiento: 'Benito Juarez',
+        lugarNacimiento: 'Benito Juarez, Ciudad de México',
+        foto: 'avatar.png',
         cartillaId: 3,
         domicilioId: 3
     },
@@ -60,7 +63,8 @@ const usuarios = [
         domicilio: 'Calle 4 #101',
         fechaNacimiento: '1960-01-04',
         genero: 'Hombre',
-        lugarNacimiento: 'Texcoco',
+        lugarNacimiento: 'Texcoco, Estado de México',
+        foto: 'avatar.png',
         cartillaId: 4,
         domicilioId: 4
     },
@@ -76,7 +80,8 @@ const usuarios = [
         domicilio: 'Calle 5 #202',
         fechaNacimiento: '1980-01-05',
         genero: 'Mujer',
-        lugarNacimiento: 'Acolman',
+        lugarNacimiento: 'Acolman, Estado de México',
+        foto: 'avatar.png',
         cartillaId: 5,
         domicilioId: 5
     }

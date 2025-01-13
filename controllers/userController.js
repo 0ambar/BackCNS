@@ -1,7 +1,8 @@
-import { User, Cartilla, EntidadFederativa, Asentamiento }from '../models/index.js'
-import jwt from 'jsonwebtoken'
+import { User, Staff, Admin, Cartilla, Asentamiento }from '../models/index.js'
 import bcrypt from 'bcrypt'
 import dotenv from 'dotenv'
+import { generarId } from '../helpers/token.js';
+import { emailOlvidePassword } from '../helpers/emails.js';
 
 dotenv.config({path: '.env'});
 
@@ -17,21 +18,10 @@ const mostrarPaciente = async (req, res, next) => {
         res.json({ mensaje: 'Ese paciente no existe' });
         next();
     } else {
-        // Calcular la edad del paciente
-        const calcularEdad = (fechaNacimiento) => {
-            const hoy = new Date();
-            const nacimiento = new Date(fechaNacimiento);
-            let edad = hoy.getFullYear() - nacimiento.getFullYear();
-            const mes = hoy.getMonth() - nacimiento.getMonth();
-            if (mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())) {
-                edad--;
-            }
-            return edad;
-        };
 
-        const edad = calcularEdad(paciente.fechaNacimiento);
+        const edad = paciente.calcularEdad(paciente.fechaNacimiento);
 
-        // Mostrar el paciente con la edad calculada y sin contraseña
+        // Mostrar el paciente con la edad calculada 
         const pacienteData = { ...paciente.toJSON(), edad };
         delete pacienteData.password
         delete pacienteData.createdAt; // Eliminar el campo que no quieres mostrar
@@ -43,8 +33,12 @@ const mostrarPaciente = async (req, res, next) => {
 const actualizarPaciente = async (req, res, next) => {
 
     const { password, newEmail, newPassword } = req.body;
-    const paciente = await User.findByPk(req.params.idPaciente);
-    console.log(req.body);   
+    const paciente = await User.findByPk(req.params.idPaciente, {
+        include: [
+            { model: Cartilla },
+            { model: Asentamiento }
+        ]
+    });
     
     // El usuario existe, verificar si el password es correcto o incorrecto
     if(!paciente.verificarPassword(password ? password : '') || (!password)) {
@@ -53,30 +47,22 @@ const actualizarPaciente = async (req, res, next) => {
         return next();
     }            
 
-    
     const salt = await bcrypt.genSalt(10);
     const passwordHashed = await bcrypt.hash(( newPassword ? newPassword : password), salt);
-    console.log(newPassword)
-
     
     try {
         paciente.password = passwordHashed;
-        paciente.email = newEmail ? newEmail : paciente.email;
+        paciente.email = newEmail ? newEmail.toLowerCase() : paciente.email;
         await paciente.save();
         
-        // firmar el token
-        const token = jwt.sign({
-            email : paciente.email, 
-            id : paciente.id,
-            curp: paciente.curp
-        }, 
-        process.env.SECRET, 
-        {
-            expiresIn : '24h'
-        }); 
-        
-        // retornar el TOKEN
-        res.json({token: token , mensaje: `Sus datos se han actualizado`});
+        const edad = paciente.calcularEdad(paciente.fechaNacimiento);
+
+        // Mostrar el paciente con la edad calculada 
+        const pacienteData = { ...paciente.toJSON(), edad };
+        delete pacienteData.password
+        delete pacienteData.createdAt; // Eliminar el campo que no quieres mostrar
+        delete pacienteData.updatedAt; // Eliminar el campo que no quieres mostrar
+        res.json({pacienteData, mensaje: `Sus datos se han actualizado`});
 
     } catch (error) {
         res.send(error);
@@ -84,44 +70,161 @@ const actualizarPaciente = async (req, res, next) => {
     }
 }
 
-const autenticarUsuario = async (req, res, next) => { 
-    // buscar el paciente   
+// FUNCIONES PARA CONTROLES DE CARTILLAS
+const autenticarUsuario = async (req, res, next) => {
     let { email, password } = req.body;
-    email = email ? email : '';
-    const paciente = await User.findOne({ where : { email }});
-    
-    if(!paciente) {
-        res.status(401).json({mensaje : 'No eres un paciente registrado'});
-        return next();
-    } else {
-        // El usuario existe, verificar si el password es correcto o incorrecto
-        if(!bcrypt.compareSync(password, paciente.password )) {
-            // si el password es incorrecto
-            await res.status(401).json({ mensaje : 'Password Incorrecto'});
-            next();
-        } else {
-            // password correcto, firmar el token
-            const token = jwt.sign({
-                email : paciente.email, 
-                id : paciente.id,
-                curp: paciente.curp
-            }, 
-            process.env.SECRET, 
-            {
-                expiresIn : '24h'
-            }); 
+    email = email ? email.toLowerCase() : '';
+    password = password ? password : '';
+
+    const encontrarUsuario = async (email) => {
+        try {
+            const user = await User.findOne({ where: { email } });
+            if (user) return user
+
+            const staff = await Staff.findOne({ where: { email } });
+            if (staff) return staff
+
+            const admin = await Admin.findOne({ where: { email } });
+            if (admin) return admin
             
-            // retornar el TOKEN
-            res.json({ token });
+            // Si no se encuentra el usuario 
+            return null;
+        } catch (error) {
+            res.send(error);
+            next();
         }
     }
+
+    encontrarUsuario(email).then(usuario => {
+        if (!usuario) {
+            res.status(401).json({ mensaje: 'Ese usuario no existe' });
+            return next();
+        }
+
+        if (!usuario.verificarPassword(password)) {
+            res.status(401).json({ mensaje: 'Password Incorrecto' });
+            return next();
+        }
+
+        const { 
+            id, 
+            nombre, 
+            apellidoPaterno,
+            apellidoMaterno,
+            email,
+            tipo,
+        } = usuario;
+
+        res.json({
+            id, 
+            nombre, 
+            apellidoPaterno,
+            apellidoMaterno,
+            email,
+            tipo,
+        });
+    });
 }
 
+
+const resetPassword = async (req, res, next) => {
+    let { email } = req.body;
+    email = email ? email.toLowerCase() : '';
+
+    const encontrarUsuario = async (email) => {
+        try {
+            const user = await User.findOne({ where: { email } });
+            if (user) return user
+
+            const staff = await Staff.findOne({ where: { email } });
+            if (staff) return staff
+
+            const admin = await Admin.findOne({ where: { email } });
+            if (admin) return admin
+            
+            // Si no se encuentra el usuario 
+            return null;
+        } catch (error) {
+            res.send(error);
+            next();
+        }
+    }
+
+    encontrarUsuario(email).then(async usuario => {
+        if (!usuario) {
+            res.status(401).json({ mensaje: 'Ese usuario no existe' });
+            return next();
+        }
+
+        const token = generarId();
+    
+        // Enviar el token por correo
+        emailOlvidePassword({
+            nombre: usuario.nombre, 
+            email: usuario.email, 
+            token
+        });
+    
+        res.json({ mensaje: 'Se ha enviado un correo con una contraseña temporal' });    
+    });
+
+}
+
+const confirmaResetPassword = async (req, res, next) => {
+    let { email, token } = req.params;
+    email = email ? email.toLowerCase() : '';
+    token = token ? token : '';
+
+
+    if(token.length === 0) {
+        res.status(401).send({ mensaje: 'Token no válido' });
+        return next();
+    }
+
+    const encontrarUsuario = async (email) => {
+        try {
+            const user = await User.findOne({ where: { email } });
+            if (user) return user
+
+            const staff = await Staff.findOne({ where: { email } });
+            if (staff) return staff
+
+            const admin = await Admin.findOne({ where: { email } });
+            if (admin) return admin
+            
+            // Si no se encuentra el usuario 
+            return null;
+        } catch (error) {
+            res.send(error);
+            next();
+        }
+    }
+
+    encontrarUsuario(email).then(async usuario => {
+        if (!usuario) {
+            res.send({ mensaje: 'Ese usuario no existe' });
+            return next();
+        }
+
+        const salt = await bcrypt.genSalt(10);
+        const passwordHashed = await bcrypt.hash(token, salt);
+
+        usuario.password = passwordHashed;
+        usuario.save();
+
+        res.send(`Se ha actualizado la contraseña de ${usuario.email}: ${token}`);
+        
+        // res.json(`Se ha actualizado la contraseña de ${usuario.email}: ${token}`);
+        
+    });
+}
 
 
 // export nombrado
 export {
     mostrarPaciente,
     actualizarPaciente,
-    autenticarUsuario
+    autenticarUsuario,
+    resetPassword, 
+    confirmaResetPassword
 }

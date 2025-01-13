@@ -1,5 +1,7 @@
 import express from "express";
 import {
+    subirArchivo, 
+
     nuevoPaciente,
     mostrarPacientes,
     mostrarPaciente,
@@ -9,9 +11,9 @@ import {
     nuevoColaborador,
     mostrarColaborador,
     actualizarColaborador,
-} from "../controllers/staffController.js";
 
-import auth from "../middleware/auth.js";
+    consultaDomicilio,
+} from "../controllers/staffController.js";
 
 const router = express.Router();
 
@@ -19,8 +21,7 @@ const router = express.Router();
 router.get('/ver-pacientes', mostrarPacientes);
 
 // Agrega nuevos pacientes via POST
-router.post('/registrar-paciente', nuevoPaciente);
-
+router.post('/registrar-paciente', subirArchivo, nuevoPaciente);
 
 // Muestra un paciente en especifico 
 router.get('/ver-paciente/:idPaciente', mostrarPaciente);
@@ -31,6 +32,9 @@ router.put('/actuaizar-paciente/:idPaciente', actualizarPaciente)
 // Elimnar paciente por su ID
 router.delete('/eliminar-paciente/:idPaciente', eliminarPaciente);
 
+
+// Consultar domicilios de la BD
+router.get('/domicilios/:codigoPostal', consultaDomicilio);
 
 
 // Agrega nuevo trabajador via POST
