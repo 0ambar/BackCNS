@@ -55,7 +55,7 @@ const actualizarAdmin = async (req, res, next) => {
 
     if(!admin.verificarPassword(password ? password : '') || (!password)) {
         res.json({mensaje : 'Password Incorrecto'});
-        next();
+        return next();
     }
 
     const salt = await bcrypt.genSalt(10);

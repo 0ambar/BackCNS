@@ -39,6 +39,8 @@ const actualizarPaciente = async (req, res, next) => {
             { model: Asentamiento }
         ]
     });
+
+    console.log(req.body);
     
     // El usuario existe, verificar si el password es correcto o incorrecto
     if(!paciente.verificarPassword(password ? password : '') || (!password)) {

@@ -40,7 +40,7 @@ const populateDatabase = async () => {
 
     for (const line of lines) {
 
-      if(cont > 20){
+      if(cont > 100){
         break;
       }
       cont++;

@@ -91,7 +91,7 @@ const actualizarColaborador = async (req, res, next) => {
     
     // El usuario existe, verificar si el password es correcto o incorrecto
     if(!trabajador.verificarPassword(password ? password : '') || (!password)) {
-        res.json({mensaje : 'Password Incorrecto'});
+        return res.json({mensaje : 'Password Incorrecto'});
         next();
     }
 
@@ -128,14 +128,27 @@ const nuevoPaciente = async (req, res, next) => {
     const paciente = new User(req.body);
 
     try {
-        if(req.file.filename) {
-            paciente.foto = req.file.filename;
-        }
+        // if(req.file.filename) {
+        //     paciente.foto = req.file.filename;
+        // }
+        // else {
+            paciente.foto = 'avatar.png';
+        // }
         await paciente.save();
-        res.json({paciente, mensaje : 'Se agrego un nuevo paciente'});
+
+        const pacienteConAsentamiento = await User.findByPk(paciente.id, {
+            include: [
+                { model: Asentamiento }
+            ]
+        });
+
+        res.json({paciente: pacienteConAsentamiento, mensaje: 'Se agrego un nuevo paciente'});
+       
+        // res.json({paciente, mensaje : 'Se agrego un nuevo paciente'});
+
     } catch (error) {
         console.error(error);
-        res.json({mensaje : 'Error en la creacion del paciente'});
+        res.send(error);
         return next();
     }
 }

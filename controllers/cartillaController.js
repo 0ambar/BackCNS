@@ -41,6 +41,40 @@ const mostrarCartilla = async (req, res, next) => {
     res.json(cartilla);
 }
 
+const mostrarCartillaPorCurp = async (req, res, next) => {
+    const paciente = await User.findOne({where: {curp: req.params.curp}, 
+        include: [
+            {model: Cartilla},
+        ]
+    }
+    );
+
+    if(!paciente) {
+        res.json({mensaje : 'Curp no asosiada a ningun paciente'});
+        return next();
+    }
+
+    const cartilla = await Cartilla.findByPk(paciente.cartilla.id, {
+        include: [
+            {model: Antecedente },
+            {model: Cita},
+            {model: Estudio},
+            {model: Nutricion},
+            {model: SaludSexual},
+            {model: Vacuna}
+        ]
+    }
+    );
+
+    if(!cartilla) {
+        res.json({mensaje : 'Esa cartilla no existe'});
+        return next();
+    }
+    // Mostrar el paciente
+    res.json(cartilla);
+}
+
+
 const actualizarCartilla = async (req, res, next) => {
 
     const { tipo, observaciones, antecedenteId } = req.body;
