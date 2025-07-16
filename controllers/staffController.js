@@ -206,16 +206,16 @@ const actualizarPaciente = async (req, res, next) => {
         curp,
         tipoSangre,
         domicilio,
-        fehcaNacimiento,
+        fechaNacimiento,
         genero,
         lugarNacimiento,
         estatus,
         cartillaId,
-        entidadId
+        domicilioId
     } = req.body;
     
-    const salt = await bcrypt.genSalt(10);
-    const passwordHashed = await bcrypt.hash(password, salt);
+    // const salt = await bcrypt.genSalt(10);
+    // const passwordHashed = await bcrypt.hash(password, salt);
     
     
     try {
@@ -224,16 +224,16 @@ const actualizarPaciente = async (req, res, next) => {
             apellidoPaterno,
             apellidoMaterno,
             email,
-            password : passwordHashed,
+            // password : passwordHashed,
             curp: curp.toUpperCase(),
             tipoSangre,
             domicilio,
-            fehcaNacimiento,
+            fechaNacimiento,
             genero,
             lugarNacimiento,
             estatus,
             cartillaId,
-            entidadId
+            domicilioId
         }, {
             where : { id : req.params.idPaciente }
         });

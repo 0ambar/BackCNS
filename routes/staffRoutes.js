@@ -29,7 +29,7 @@ router.post('/registrar-paciente',
 router.get('/ver-paciente/:idPaciente', mostrarPaciente);
 
 // Actualizar datos de un paciente
-router.put('/actuaizar-paciente/:idPaciente', actualizarPaciente)
+router.put('/actualizar-paciente/:idPaciente', actualizarPaciente)
 
 // Elimnar paciente por su ID
 router.delete('/eliminar-paciente/:idPaciente', eliminarPaciente);
